@@ -29,7 +29,6 @@ public class GraphPanel extends JComponent {
     private boolean connecting = false;
     private ArrayList<String> caracteres = new ArrayList<>();
     private Node aux;
-    private Point aux2;
 
     public static void main(String[] args) throws Exception {
         EventQueue.invokeLater(new Runnable() {
@@ -276,9 +275,62 @@ public class GraphPanel extends JComponent {
                 HashMap<Pair, Boolean> pairs = MinimizeAFD.setupMarkedPairs(dfa);
                 MinimizeAFD.processPairs(dfa, pairs);
                 int[] e_class = MinimizeAFD.createEqClasses(dfa, pairs);
-                JOptionPane.showMessageDialog(null, MinimizeAFD.outputResults(dfa, pairs, e_class));
+                edges.clear();
+                //nodes.clear();
+
+                List<Node> nuevos = new ArrayList<>();
+                count=0;
+                //System.out.println(MinimizeAFD.outputResults(dfa, pairs, e_class));
+                //String base = MinimizeAFD.outputResults(dfa, pairs, e_class);
+                String []lineas = MinimizeAFD.outputResults(dfa, pairs, e_class).split("\n");
+                for( String val : lineas[0].split(" ") ){
+                    Node pan = nodes.get(Integer.parseInt(val));
+                    //pan.countnodo = Integer.parseInt(val);
+                    nuevos.add(pan); //nodes.get(Integer.parseInt(val))
+                }
+                nodes = nuevos;
+
+                for( Node nodo : nodes ){
+                    if( Integer.parseInt(lineas[1]) == nodo.countnodo ){
+                        nodo.setEstadoInicial(true);
+                    }
+                }
+
+                for( Node nodo : nodes ){
+                    for( String fins : lineas[2].split(" ") )
+                        if( nodo.countnodo == Integer.parseInt(fins) )
+                            nodo.estadoFinal = true;
+                }
+
+                for( int i = 3; i < lineas.length; i++ ){
+                    int ori, des;
+                    List<String> trans = new ArrayList<>(); //CHECA PARA VER NUEVAS TRANSICIONES PARA LOS EDGES
+
+                    ori = Integer.parseInt(lineas[i].split(" ")[0]);
+                    des = Integer.parseInt(lineas[i].split(" ")[2]);
+                    trans.add(lineas[i].split(" ")[1]);
+                    Node aux1=null;
+                    Node aux2=null;
+                    for(Node node: nodes){
+                        if(node.countnodo ==ori){
+                            aux1= node;
+                        }
+                        if(node.countnodo ==des){
+                            aux2= node;
+                        }
+                    }
+                    Edge killMe = new Edge(aux1,aux2);
+                    killMe.setCaracteres(trans.toArray(new String[trans.size()]));
+                    edges.add(killMe);
+                }
+                for(int i =0;i<nodes.size();i++){
+                    nodes.get(i).countnodo=i;
+                }
+                count=nodes.size();
+                repaint();
+               //JOptionPane.showMessageDialog(null, MinimizeAFD.outputResults(dfa, pairs, e_class));
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null,"Datos incorrectos","ERROR",JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null,"Datos incorrectos","ERROR",JOptionPane.ERROR_MESSAGE);
             }
 
         }
@@ -374,6 +426,10 @@ public class GraphPanel extends JComponent {
                     iter.remove();
                 }
             }
+            for(int i=0;i<nodes.size();i++){
+                nodes.get(i).countnodo=i;
+            }
+            count=nodes.size();
             repaint();
         }
 
@@ -635,9 +691,24 @@ public class GraphPanel extends JComponent {
         private boolean selected = false;
         private Rectangle b = new Rectangle();
 
+        public Node() {
+
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Node node = (Node) o;
+            return countnodo == node.countnodo;
+        }
+
+        @Override
+        public int hashCode() {
+            return countnodo;
+        }
+
         public void setEstadoInicial(boolean b) {
-
-
             this.estadoInicial = b;
         }
 
@@ -657,8 +728,20 @@ public class GraphPanel extends JComponent {
             countnodo = count;
             count++;
             estadoFinal = false;
+            estadoInicial = false;
         }
 
+     /*   public Node() {
+            this.p =  ;
+            this.r = ;
+            this.color = ;
+            this.kind = ;
+            setBoundary(b);
+            countnodo = ;
+            count++;
+            estadoFinal = false;
+            estadoInicial = false;
+        }*/
         /**
          * Calculate this node's rectangular boundary.
          */

@@ -69,23 +69,21 @@ public class MinimizeAFD {
         HashMap<String, Boolean> rules = new HashMap<String, Boolean>();
 
         for (Map.Entry<Leftside, Integer> rule : dfa.Rules.entrySet()) {
-            String rule_str = "(q" + (e_class[rule.getKey().State] - 1) + ", " +
-                    rule.getKey().Symbol + ") -> q" + (e_class[rule.getValue()] - 1);
+            String rule_str =  (e_class[rule.getKey().State] - 1) + " " +
+                    rule.getKey().Symbol + " " + (e_class[rule.getValue()] - 1);
 
             rules.put(rule_str, true);
         }
 
-        con += "Estados:";
         for (int i : states.keySet())
-            con += " q" + (i - 1);
+            con += (i - 1)+" ";
         con += "\n";
         //print special states
-        con += "Estado inicial: q" + (dfa.StartState - 1) + "\n";
-        con += "Estado(s) Final(es):";
+        con += (dfa.StartState - 1) + "\n";
         for (int i = 1; i < dfa.IsFinal.length; i++) {
             for (int o : states.keySet()){
                 if (dfa.IsFinal[i] == true && o == i) {
-                    con +=" q"+ (i - 1);
+                    con += ""+(i - 1);
                     break;
                 }
             }
@@ -93,9 +91,6 @@ public class MinimizeAFD {
         }
         con += "\n";
 
-
-        // print rules
-        con += "Transiciones:\n";
         for (String s : rules.keySet())
             con += s + "\n";
         return con;
